@@ -81,7 +81,7 @@ export default {
             this.$eventBus.on('Mount[Annotation]', params => {
                 console.log('Loading interface: params:', params)
                 this.information = params
-                this.labels = JSON.parse(this.information['project']['label']).concat(['Previous'])
+                this.labels = JSON.parse(this.information['project']['label']).concat(['Previous', 'Next'])
                 this.idx = this.information['task']['current']
                 this.total = this.information['task']['size']
                 this.task_id = this.information['task']['id']
@@ -157,7 +157,10 @@ export default {
                 this.idx -= 1
                 this.getData(this.idx)
             } else {
-                this.$eventBus.emit('labelData[Annotation]', [this.task_id, this.idx, label])
+                if (label === 'Next')
+                    this.$eventBus.emit('labelData[Annotation]', [this.task_id, this.idx, ''])
+                else
+                    this.$eventBus.emit('labelData[Annotation]', [this.task_id, this.idx, label])
                 this.idx += 1
                 this.getData(this.idx)
             }
