@@ -39,7 +39,7 @@ export default {
         },
         save() {
             this.custom_shortcuts = this.custom_shortcuts.map(e => e.toUpperCase())
-            if (this.custom_shortcuts.length !== (new Set(this.custom_shortcuts)).size)
+            if (this.custom_shortcuts.filter(e => e !== '').length !== (new Set(this.custom_shortcuts.filter(e => e !== ''))).size)
                 this.$message.error('Duplicated hotkey, please recheck.')
             else
                 this.$emit('save', this.custom_shortcuts)
