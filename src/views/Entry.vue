@@ -31,6 +31,7 @@ import {schemeSet2, schemeSet3} from 'd3-scale-chromatic'
 import DocumentIcon from '../components/icons/document'
 import SettingIcon from '../components/icons/setting'
 import ConfigPanel from '../components/ConfigPanel'
+import commonMethods from '../common'
 
 /*
 Events who end with [Annotation] is the event for annotaion panel, would be destroy while closing the annotation interface.
@@ -58,7 +59,7 @@ export default {
             colors: [...schemeSet2, ...schemeSet3],
             shortcuts: [],
             labels: [],
-            predict: null,
+            predict: [],
             text: '',
             show_config: false
         }
@@ -68,85 +69,21 @@ export default {
         this.registerEvents()
     },
     methods: {
+        ...commonMethods,
         registerEvents() {
             this.$eventBus.on('Destroy[Annotation]', () => {
-                Object.keys(this.$eventBus.getEvents())
-                    .filter(e => e.endsWith('[Annotation]'))
-                    .forEach(eventName => {
-                            for (let eventFunc of this.$eventBus.getEvents()[eventName].values())
-                                this.$eventBus.off(eventName, eventFunc)
-                        }
-                    )
+                this.destroyAnnotator()
             })
             this.$eventBus.on('Mount[Annotation]', params => {
-                console.log('Loading interface: params:', params)
-                this.information = params
-                this.labels = JSON.parse(this.information['project']['label']).concat(['Previous', 'Next'])
-                this.idx = this.information['task']['current']
-                this.total = this.information['task']['size']
-                this.task_id = this.information['task']['id']
-                this.initKeyboardEvents()
-                this.getData(this.idx)
+                this.initAnnotator(params)
             })
             this.$eventBus.on('sentData[Annotation]', data => {
-                let text, predict
-                if (data.length === 2)
-                    [text, predict] = data
-                else
-                    [text, predict] = [data[0], null]
-
+                let text, label, predict
+                [text, label, predict] = data
                 this.text = text.replace(/\\n/g, '<br />')
-                this.predict = predict
+                this.predict = predict || []
+                this.predict = label || []
             })
-        },
-        initKeyboardEvents() {
-            let project_key = `Project:${this.information.project.id}`
-            if (localStorage.getItem(project_key) === null) {
-                // Initialize project config
-                let config = {hotkey: {}} // {label: key}
-                this.shortcuts = []
-                localStorage.setItem(project_key, JSON.stringify(config))
-            } else {
-                let config = JSON.parse(localStorage.getItem(project_key))
-                let hotkey = config['hotkey']
-                for (let label of this.labels) {
-                    if (hotkey[label] !== undefined && hotkey[label] !== null && hotkey[label] !== '') {
-                        this.shortcuts.push(hotkey[label].toUpperCase())
-                        this.$eventBus.on(`PressKey[${hotkey[label]}][Annotation]`, () => this.handleLabel(label))
-                        console.log(this.$eventBus.getEvents())
-                    } else {
-                        this.shortcuts.push('')
-                    }
-                }
-            }
-        },
-        changeHotkey(hotkeys) {
-            this.show_config = false
-            this.shortcuts = hotkeys
-            // Delete previous key event
-            Object.keys(this.$eventBus.getEvents())
-                .filter(e => e.startsWith('PressKey'))
-                .forEach(eventName => {
-                        for (let eventFunc of this.$eventBus.getEvents()[eventName].values())
-                            this.$eventBus.off(eventName, eventFunc)
-                    }
-                )
-            let hotkey_config = {}
-            for (let i = 0; i < this.labels.length; i++) {
-                let label = this.labels[i]
-                hotkey_config[label] = this.shortcuts[i].toLowerCase()
-                console.log(`Register ${hotkey_config[label]} for ${label}`)
-                if (hotkey_config[label] !== undefined && hotkey_config[label] !== null && hotkey_config[label] !== '')
-                    this.$eventBus.on(`PressKey[${hotkey_config[label]}][Annotation]`, () => this.handleLabel(label))
-            }
-            let project_key = `Project:${this.information.project.id}`
-            let config = JSON.parse(localStorage.getItem(project_key))
-            config['hotkey'] = hotkey_config
-            localStorage.setItem(project_key, JSON.stringify(config))
-        },
-        getData(idx) {
-            // 获取第 idx 条数据
-            this.$eventBus.emit('getData[Annotation]', [this.task_id, idx])
         },
         handleLabel(label) {
             if (label === 'Previous') { // get previous data
@@ -164,9 +101,6 @@ export default {
                 this.idx += 1
                 this.getData(this.idx)
             }
-        },
-        openDocument() {
-            this.$eventBus.emit('openDocument[Annotation]', this.information.project.document)
         }
     }
 }
