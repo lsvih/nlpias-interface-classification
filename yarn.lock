@@ -2081,7 +2081,7 @@ caniuse-api@^3.0.0:
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001043, caniuse-lite@^1.0.30001061:
   version "1.0.30001204"
-  resolved "https://registry.npm.kdsec.org/caniuse-lite/-/caniuse-lite-1.0.30001204.tgz"
+  resolved "https://registry.npm.taobao.org/caniuse-lite/-/caniuse-lite-1.0.30001204.tgz"
   integrity sha512-JUdjWpcxfJ9IPamy2f5JaRDCaqJOxDzOSKtbdx4rH9VivMd1vIzoPumsJa9LoMIi4Fx2BV2KZOxWhNkBjaYivQ==
 
 case-sensitive-paths-webpack-plugin@^2.3.0:
