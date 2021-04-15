@@ -18,6 +18,7 @@
                            @click.native="openDocument"/>
             <setting-icon @click.native="show_config = true"/>
         </div>
+        <div class="indicator">{{ idx + 1 }} / {{ total }}</div>
         <a-progress :percent="idx / total * 100" :show-info="false" class="progress" :stroke-width="14"
                     stroke-color="blue" stroke-linecap="square"/>
         <config-panel :visible="show_config" :labels="labels" :shortcuts="shortcuts" @close="show_config = false"
@@ -189,6 +190,21 @@ export default {
     position: fixed;
     bottom: 0;
     left: 0;
+}
+
+.indicator {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    z-index: 10;
+    user-select: none;
+    color: #ddd;
+    font-size: 30px;
+    transition-duration: .5s;
+}
+
+.indicator:hover {
+    color: #000
 }
 </style>
 
